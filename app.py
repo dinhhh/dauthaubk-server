@@ -30,12 +30,25 @@ def get_investor_results_paging():
     return response
 
 
-@app.route('/api/contractor-selection-results')
+@app.route('/api/contractor-selection-results', methods=['GET', 'POST'])
 @cross_origin()
 def get_contractor_results_paging():
     page, size = get_page_and_size(request)
     app.logger.info("Start get investor result with page = {} and size = {}".format(page, size))
-    raw_results = mongo.db.contractorBiddingResults.find().skip(page * size).limit(size)
+
+    raw_results = []
+    if request.method == 'GET':
+        raw_results = mongo.db.contractorBiddingResults.find().skip(page * size).limit(size)
+
+    if request.method == 'POST':
+        app.logger.info("Get contractor selection result with post method")
+        request_body = request.get_json()
+        key_word = request_body.get("keyword", '')
+        app.logger.info("Keyword = {}".format(key_word))
+        if key_word != '':
+            query = {'Thông tin chi tiết.Tên gói thầu': {'$regex': key_word, '$options': 'i'}}
+            raw_results = mongo.db.contractorBiddingResults.find(query).skip(page * size).limit(size)
+
     mapping_result = []
     for result in raw_results:
         try:
@@ -50,7 +63,7 @@ def get_contractor_results_paging():
             temp["Kết quả"]["Giá trúng thầu"] = result["Kết quả"]["Giá trúng thầu"]
             mapping_result.append(temp)
         except:
-            logging.warn("Error when mapping field with raw result {}".format(result))
+            logging.warning("Error when mapping field with raw result {}".format(result))
     response = convert_to_resp(mapping_result)
     return response
 
@@ -124,10 +137,11 @@ def get_contractor_history_by_name(contractor_name):
 @app.route('/api/search-goods-by-name/<good_name>')
 @cross_origin()
 def search_goods_by_name(good_name):
+    page, size = get_page_and_size(request)
     name = good_name.lower()
     app.logger.info("Start search goods by name = {}".format(name))
     query = {'Mô tả tóm tắt gói thầu.Tên hàng hóa': {'$regex': name, '$options': 'i'}}
-    raw_results = mongo.db.contractorBiddingResults.find(query)
+    raw_results = mongo.db.contractorBiddingResults.find(query).skip(page * size).limit(size)
 
     mapping_result = []
     for result in raw_results:
@@ -152,6 +166,67 @@ def search_goods_by_name(good_name):
             logging.warning("Error when mapping field with raw result {}".format(result))
 
     response = convert_to_resp(mapping_result)
+    return response
+
+
+@app.route('/api/search-contractor-info', methods=['POST'])
+@cross_origin()
+def search_contractor_info():
+    if request.method == 'POST':
+        app.logger.info("Get contractor selection result with post method")
+        request_body = request.get_json()
+        key_word = request_body.get("keyword", '')
+        app.logger.info("Keyword = {}".format(key_word))
+
+        query_for_general_info = {'Thông tin chung.Tên nhà thầu': {'$regex': key_word, '$options': 'i'}}
+        general_info = mongo.db.contractorInformation.find(query_for_general_info)
+
+        query_for_history_info = {'Tên nhà thầu': {'$regex': key_word, '$options': 'i'}}
+        history_info = mongo.db.contractorHistory.find(query_for_history_info)
+
+        mapping_result = []
+        contractor_name_set = []
+
+        for contractor in general_info:
+            try:
+                temp = {}
+                temp["_id"] = contractor["_id"]
+                temp["Tên nhà thầu"] = contractor["Thông tin chung"]["Tên nhà thầu"]
+                temp["Số ĐKKD"] = contractor["Thông tin chung"]["Số ĐKKD"]
+                temp["Phân loại doanh nghiệp"] = contractor["Thông tin chung"]["Phân loại doanh nghiệp"]
+
+                if temp["Tên nhà thầu"] not in contractor_name_set:
+                    contractor_name_set.append(temp["Tên nhà thầu"])
+                    mapping_result.append(temp)
+            except:
+                app.logger.warning("Mapping fail in general info")
+
+        for contractor in history_info:
+            try:
+                temp = {}
+                temp["_id"] = contractor["_id"]
+                temp["Tên nhà thầu"] = contractor["Tên nhà thầu"]
+                temp["Số ĐKKD"] = ''
+                temp["Phân loại doanh nghiệp"] = ''
+
+                if temp["Tên nhà thầu"] not in contractor_name_set:
+                    contractor_name_set.append(temp["Tên nhà thầu"])
+                    mapping_result.append(temp)
+            except:
+                app.logger.warning("Mapping fail in history {}".format(contractor))
+
+        app.logger.info("Mapping result before filter {}".format(len(mapping_result)))
+        return convert_to_resp(mapping_result)
+
+    return {}
+
+
+@app.route('/api/search-contractor-info-by-obj-id/<object_id>')
+@cross_origin()
+def get_contractor_by_obj_id(object_id):
+    app.logger.info("Start search contractor with object id {}".format(object_id))
+    results = mongo.db.contractorInformation.find({"_id": ObjectId(object_id)})
+    response = convert_to_resp_with_out_prefix(results[0])
     return response
 
 
