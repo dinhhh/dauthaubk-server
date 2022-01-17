@@ -1,0 +1,652 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "DauThau-BK",
+    "version": "1.0.0",
+    "title": "Swagger UI",
+    "contact": {
+      "email": "dinhhung.0115@gmail.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "tags": [
+    {
+      "name": "Generate bubble chart",
+      "description": "API for displaying bubble chart"
+    },
+    {
+      "name": "Bid searching",
+      "description": "API for getting information of bid"
+    },
+    {
+      "name": "User",
+      "description": "API for requesting users"
+    },
+    {
+      "name": "Contractor",
+      "description": "API for searching contractor"
+    },
+    {
+      "name": "Good searching",
+      "description": "API for searching good"
+    },
+    {
+      "name": "Investor",
+      "description": "API for searching investor"
+    }
+  ],
+  "paths": {
+    "/api/bubble-chart/bidding-invitation": {
+      "post": {
+        "tags": ["Generate bubble chart"],
+        "requestBody": {
+          "description": "Keyword from user input",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/keyword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/search-bid-by-name": {
+      "post": {
+        "tags": ["Bid searching"],
+        "requestBody": {
+          "description": "Bid and solicitor name. Plan is true if search by bid plan (Kế hoạch lựa chọn nhà thầu)",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/searchBidByNameRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/user/register": {
+      "description": "Register new user with type = 'Nhà thầu' or 'Nhà đầu tư'",
+      "post": {
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/registerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          },
+          "422": {
+            "$ref": "#/components/responses/unableToPress"
+          }
+        }
+      }
+    },
+    "/api/user/login": {
+      "post": {
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/userLoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/user/refresh": {
+      "post": {
+        "tags": ["User"],
+        "description": "Refresh user's token by refresh token",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      }
+    },
+    "/api/user/get-subs": {
+      "post": {
+        "tags": ["User"],
+        "description": "Get all bids whose user subscribe for",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/json": {}
+            },
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/user/broadcast": {
+      "post": {
+        "tags": ["User"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      }
+    },
+    "/api/user/subscribe": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/subscribeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          },
+          "422": {
+            "$ref": "#/components/responses/unableToPress"
+          }
+        }
+      }
+    },
+    "/api/search-contractor-info-by-obj-id/{objectId}": {
+      "get": {
+        "tags": ["Contractor"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "objectId",
+            "description": "Object id of contract in contractor collection or contractor history collection. Example: 61ac2619238b0f5027bb122a",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          },
+          "500": {
+            "$ref": "#/components/responses/internalServerError"
+          }
+        }
+      }
+    },
+    "/api/search-contractor-by-name/{name}": {
+      "get": {
+        "tags": ["Contractor"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "description": "Find first contractor in contractor collection that match input name (Tên nhà thầu)",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      }
+    },
+    "/api/search-contractor-info": {
+      "post": {
+        "tags": ["Contractor"],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/keyword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      }
+    },
+    "/api/search-goods-by-name/{name}": {
+      "get": {
+        "tags": ["Good searching"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      }
+    },
+    "/api/contractor-history/{contractorName}": {
+      "get": {
+        "description": "Get contractor history by absolute name for comparing",
+        "tags": ["Contractor"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contractorName",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      }
+    },
+    "/api/contractor-selection-results/{objectId}": {
+      "get": {
+        "tags": ["Contractor"],
+        "description": "Get contractor selection result by object id (Kết quả lựa chọn nhà thầu)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "objectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      }
+    },
+    "/api/contractor-selection-plans": {
+      "get": {
+        "tags": ["Contractor"],
+        "description": "Get contractor selection plans for listing (Kế hoạch lựa chọn nhà thầu)",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      },
+      "post": {
+        "description": "Get contractor selection plans for searching",
+        "tags": ["Contractor"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/keyword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      }
+    },
+    "/api/contractor-bidding_invitations": {
+      "get": {
+        "tags": ["Contractor"],
+        "description": "Get contractor bidding invitations for listing (Thông báo mời thầu)",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Contractor"],
+        "description": "Get contractor bidding invitations for searching (Thông báo mời thầu)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/keyword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      }
+    },
+    "/api/contractor-selection-results": {
+      "get": {
+        "tags": ["Contractor"],
+        "description": "Get contractor selection result for listing (Kết quả lựa chọn nhà thầu)",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Contractor"],
+        "description": "Get contractor selection results for searching (Kết quả lựa chọn nhà thầu)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/keyword"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      }
+    },
+    "/api/investor-selection-results": {
+      "get": {
+        "tags": ["Investor"],
+        "description": "Get investor selection results for listing",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "size",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      }
+    },
+    "/api/investor-info": {
+      "get": {
+        "tags": ["Investor"],
+        "description": "Get all investors for testing",
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/success"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "JWT Authorization header using the Bearer scheme",
+        "bearerFormat": "JWT",
+        "in": "header",
+        "name": "Authorization"
+      }
+    },
+    "responses": {
+      "success": {
+        "description": "OK"
+      },
+      "unauthorized": {
+        "description": ""
+      },
+      "unableToPress": {
+        "description": "Unable to process the contained instructions"
+      },
+      "internalServerError": {
+        "description": "Internal server error"
+      }
+    },
+    "schemas": {
+      "keyword": {
+        "type": "object",
+        "properties": {
+          "keyword": {
+            "type": "string",
+            "format": "string"
+          }
+        }
+      },
+      "searchBidByNameRequest": {
+        "type": "object",
+        "properties": {
+          "bidName": {
+            "type": "string",
+            "format": "string"
+          },
+          "solicitor": {
+            "type": "string",
+            "format": "string"
+          },
+          "isPlan": {
+            "type": "boolean"
+          }
+        }
+      },
+      "userLoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "string"
+          }
+        }
+      },
+      "subscribeRequest": {
+        "type": "object",
+        "properties": {
+          "solicitor": {
+            "type": "string",
+            "format": "string"
+          },
+          "infoCategory": {
+            "type": "string",
+            "format": "string"
+          },
+          "province": {
+            "type": "string",
+            "format": "string"
+          },
+          "bidCategory": {
+            "type": "string",
+            "format": "string"
+          },
+          "bidForm":{
+            "type": "string",
+            "format": "string"
+          }
+        }
+      },
+      "registerRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "format": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "string"
+          },
+          "type": {
+            "type": "string",
+            "format": "string"
+          }
+        }
+      }
+    }
+  }
+}
