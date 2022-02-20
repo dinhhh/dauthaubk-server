@@ -113,13 +113,17 @@ def broadcast(collection_name, item):
     logging.info("Find all users")
     subscribers = []
     for user in users:
-        sub_info = user[collection_info["name"]]
-        if sub_info is not None:
-            if (is_empty_or_none(sub_info["Bên mời thầu"]) or (sub_info["Bên mời thầu"] != "" and sub_info["Bên mời thầu"] in get_solicitor_in_item(item))) and \
-                    (is_empty_or_none(sub_info["Hình thức đấu thầu"]) or (sub_info["Hình thức đấu thầu"] in item["Hình thức đấu thầu"])) and \
-                    (is_empty_or_none(sub_info["Lĩnh vực"]) or (sub_info["Lĩnh vực"] in item.get("Lĩnh vực", ""))):
-                # TODO: Kiểm tra địa phương?
+        try:
+            sub_info = user[collection_info["name"]]
+            if sub_info is not None:
+                # if (is_empty_or_none(sub_info["Bên mời thầu"]) or (sub_info["Bên mời thầu"] in get_solicitor_in_item(item))) and \
+                #         (is_empty_or_none(sub_info["Hình thức đấu thầu"]) or (sub_info["Hình thức đấu thầu"] in item["Hình thức đấu thầu"])) and \
+                #         (is_empty_or_none(sub_info["Lĩnh vực"])):
+                    # TODO: Kiểm tra địa phương?
                 subscribers.append(user)
+        except:
+            print("User not subscribe")
+            continue
 
     print(f"Subscribers: {subscribers}")
     for subscriber in subscribers:

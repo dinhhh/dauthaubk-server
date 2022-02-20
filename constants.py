@@ -1,5 +1,5 @@
 COLLECTION_CONSTANTS = [
-    {"name": "Thông báo trúng thầu", "collection_name": "contractorBiddingResults"},
+    {"name": "Kết quả trúng thầu", "collection_name": "contractorBiddingResults"},
     {"name": "Kế hoạch lựa chọn nhà thầu", "collection_name": "contractorSelectionPlans"},
     {"name": "Thông báo mời thầu", "collection_name": "contractorBiddingInvitations"}
 ]
